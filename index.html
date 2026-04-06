@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AS ENTERPRISES | MASTER V9</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Plus+Jakarta+Sans:wght@300;400;600;800&display=swap');
+        :root { --gold: linear-gradient(135deg, #bf953f, #fcf6ba, #b38728, #fbf5b7, #aa771c); --border: rgba(191, 149, 63, 0.3); }
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background: #000; color: #fff; margin: 0; padding-bottom: 100px; overflow-x: hidden; }
+        .luxury-font { font-family: 'Cinzel', serif; }
+        .glass { background: rgba(18, 18, 18, 0.95); backdrop-filter: blur(20px); border: 1px solid var(--border); border-radius: 30px; }
+        .btn-gold { background: var(--gold); color: #000; font-weight: 800; text-transform: uppercase; padding: 16px; border-radius: 18px; width: 100%; transition: 0.3s; border: none; cursor: pointer; }
+        
+        /* CUSTOM PREMIUM DROPDOWN UI */
+        .dropdown-container { position: relative; width: 160px; }
+        .dropdown-trigger { background: rgba(20,20,20,0.9); border: 1px solid var(--border); color: #bf953f; border-radius: 12px; padding: 8px 15px; font-size: 10px; font-weight: 800; display: flex; justify-content: space-between; align-items: center; cursor: pointer; text-transform: uppercase; }
+        .dropdown-menu { position: absolute; top: 110%; right: 0; width: 180px; background: #111; border: 1px solid #bf953f; border-radius: 15px; display: none; flex-direction: column; z-index: 1000; box-shadow: 0 10px 30px rgba(0,0,0,0.8); overflow: hidden; }
+        .dropdown-menu.show { display: flex; animation: slideIn 0.2s ease; }
+        .dropdown-item { padding: 12px 20px; font-size: 10px; font-weight: 700; color: #fff; border-bottom: 1px solid rgba(191, 149, 63, 0.1); text-transform: uppercase; }
+        .dropdown-item:last-child { border: none; }
+        .dropdown-item:active { background: var(--gold); color: #000; }
+
+        @keyframes slideIn { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
+
+        .swiper { border-radius: 30px; border: 1px solid var(--border); overflow: hidden; margin-bottom: 20px; }
+        .swiper-slide img { width: 100%; height: 100%; object-fit: cover; }
+        .page { display: none; padding: 20px; animation: fadeIn 0.4s ease; }
+        .page.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        
+        input, textarea { background: rgba(255,255,255,0.05) !important; border: 1px solid var(--border) !important; color: white !important; border-radius: 15px !important; padding: 12px !important; outline: none; width: 100%; }
+        .nav-bar { position: fixed; bottom: 20px; left: 20px; right: 20px; background: rgba(10,10,10,0.95); border: 1px solid var(--border); border-radius: 25px; display: flex; justify-content: space-around; padding: 15px; z-index: 9999; }
+        .filter-chip { padding: 8px 15px; border-radius: 12px; border: 1px solid var(--border); font-size: 10px; font-weight: 700; white-space: nowrap; cursor: pointer; }
+        .filter-chip.active { background: var(--gold); color: #000; }
+        .size-box { border: 1px solid rgba(255,255,255,0.1); padding: 10px 20px; border-radius: 12px; cursor: pointer; transition: 0.3s; text-align: center; font-weight: bold; }
+        .size-box.selected { background: var(--gold); color: #000; border-color: transparent; }
+
+        /* CUSTOM ALERT POPUP */
+        #customPopup { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 1000000; display: none; align-items: center; justify-content: center; backdrop-filter: blur(8px); }
+        .popup-content { width: 85%; max-width: 320px; padding: 35px; text-align: center; border: 1px solid #bf953f; border-radius: 35px; background: #0a0a0a; }
+        #customPopup.show { display: flex; }
+    </style>
+</head>
+<body onclick="closeAllDropdowns(event)">
+
+    <div id="customPopup" onclick="closePopup()">
+        <div class="popup-content shadow-2xl" onclick="event.stopPropagation()">
+            <div class="text-4xl mb-4">✨</div>
+            <p id="popupMsg" class="luxury-font text-yellow-500 text-lg mb-2">Notice</p>
+            <p id="popupSub" class="text-[10px] opacity-60 uppercase tracking-widest">Please Select Size First</p>
+            <button class="btn-gold mt-8 py-3 text-[10px]" onclick="closePopup()">Continue</button>
+        </div>
+    </div>
+
+    <div id="homePage" class="page active">
+        <header class="mb-6 flex justify-between items-center">
+            <h1 class="luxury-font text-2xl text-yellow-500 tracking-tighter">AS ENTERPRISES</h1>
+            <div onclick="showPage('profilePage')" class="w-10 h-10 glass flex items-center justify-center">⚙️</div>
+        </header>
+
+        <div class="mb-6"><input type="text" id="searchInput" oninput="filterProducts()" placeholder="Search collection..." class="!rounded-full"></div>
+
+        <div class="flex gap-3 overflow-x-auto pb-4 mb-4" id="catFilters">
+            <div class="filter-chip active" onclick="setCat('All', this)">All</div>
+            <div class="filter-chip" onclick="setCat('Nighty', this)">Nighty</div>
+            <div class="filter-chip" onclick="setCat('Jeans', this)">Jeans</div>
+            <div class="filter-chip" onclick="setCat('Tshirt', this)">T-shirt</div>
+            <div class="filter-chip" onclick="setCat('Shirt', this)">Shirt</div>
+            <div class="filter-chip" onclick="setCat('Pant', this)">Pant</div>
+            <div class="filter-chip" onclick="setCat('Kurti', this)">Kurti</div>
+            <div class="filter-chip" onclick="setCat('Suit', this)">Suit</div>
+        </div>
+
+        <div class="flex justify-between items-center mb-6 px-1">
+            <p class="text-[9px] font-black opacity-30 uppercase tracking-[2px]">Sort Gallery</p>
+            
+            <div class="dropdown-container">
+                <div class="dropdown-trigger" id="sortLabel" onclick="event.stopPropagation(); toggleSort()">
+                    <span>✦ New Arrivals</span> ▾
+                </div>
+                <div class="dropdown-menu" id="sortMenu">
+                    <div class="dropdown-item" onclick="setSort('new', '✦ New Arrivals')">✦ New Arrivals</div>
+                    <div class="dropdown-item" onclick="setSort('low', '₹ Low to High')">₹ Low to High</div>
+                    <div class="dropdown-item" onclick="setSort('high', '₹ High to Low')">₹ High to Low</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="swiper mainSwiper"><div class="swiper-wrapper" id="bList"></div></div>
+        <div class="grid grid-cols-2 gap-4" id="sGrid"></div>
+    </div>
+
+    <div id="cartPage" class="page">
+        <h2 class="luxury-font text-3xl text-center mb-10 text-yellow-500">Shopping Bag</h2>
+        <div id="bItems" class="space-y-4 mb-10"></div>
+        <div id="bSummary" class="glass p-6 hidden">
+            <div class="flex justify-between mb-6"><span class="text-xs opacity-60">Total:</span><span class="text-xl font-black text-yellow-500" id="totalPrice">₹0</span></div>
+            <button onclick="document.getElementById('co').classList.remove('hidden')" class="btn-gold">Place Order</button>
+        </div>
+        <div id="bEmpty" class="text-center opacity-10 mt-40 text-xs tracking-widest">BAG IS EMPTY</div>
+    </div>
+
+    <div id="profilePage" class="page">
+        <div id="aLogin" class="pt-20 text-center">
+            <input type="password" id="pin" class="!text-center !text-3xl" placeholder="••••">
+            <button onclick="auth()" class="btn-gold mt-4">Unlock Store</button>
+        </div>
+        <div id="aPanel" class="hidden">
+            <div class="glass p-6 mb-8">
+                <input type="text" id="in" placeholder="Product Name">
+                <input type="number" id="ip" placeholder="Price ₹">
+                <select id="ic" class="!bg-[#111] !border-[#bf953f] !text-[#bf953f] !w-full !py-3 !mb-4">
+                    <option value="Nighty">Nighty</option><option value="Jeans">Jeans</option>
+                    <option value="Tshirt">T-shirt</option><option value="Shirt">Shirt</option>
+                    <option value="Pant">Pant</option><option value="Kurti">Kurti</option><option value="Suit">Suit</option>
+                </select>
+                <div class="flex justify-around mb-6">
+                    <label class="text-xs"><input type="checkbox" class="isz" value="S"> S</label>
+                    <label class="text-xs"><input type="checkbox" class="isz" value="M"> M</label>
+                    <label class="text-xs"><input type="checkbox" class="isz" value="L"> L</label>
+                    <label class="text-xs"><input type="checkbox" class="isz" value="XL"> XL</label>
+                </div>
+                <input type="file" id="if" onchange="prepImg(event)" class="text-[10px]">
+                <button onclick="save()" class="btn-gold mt-4">Publish to Store</button>
+            </div>
+            <div id="iList" class="space-y-3"></div>
+        </div>
+    </div>
+
+    <div id="pDet" class="fixed inset-0 bg-black z-[50000] hidden p-8 overflow-y-auto">
+        <button onclick="this.parentElement.classList.add('hidden')" class="text-yellow-500 text-[10px] font-bold mb-8 uppercase tracking-widest">← Return to Store</button>
+        <div id="vi" class="w-full aspect-[4/5] rounded-[45px] overflow-hidden mb-8 border border-yellow-900/30"></div>
+        <h2 id="vt" class="luxury-font text-3xl mb-2"></h2>
+        <p id="vp" class="text-2xl text-yellow-500 mb-8 font-black"></p>
+        <div id="vs" class="flex gap-3 mb-12"></div>
+        <button onclick="addToBag()" class="btn-gold">Add to Bag</button>
+    </div>
+
+    <div id="co" class="fixed inset-0 bg-black/95 z-[60000] hidden p-10">
+        <h2 class="luxury-font text-2xl text-yellow-500 mb-8 text-center">Delivery Info</h2>
+        <input type="text" id="cn" placeholder="Full Name" class="mb-4"><textarea id="ca" placeholder="Address" rows="4" class="mb-4"></textarea>
+        <button onclick="order()" class="btn-gold">Send to WhatsApp</button>
+        <button onclick="this.parentElement.classList.add('hidden')" class="w-full mt-4 text-[10px] opacity-30 font-bold tracking-[2px]">CANCEL</button>
+    </div>
+
+    <nav class="nav-bar">
+        <div onclick="showPage('homePage')">🏠</div>
+        <div onclick="showPage('cartPage')">🛍️</div>
+        <div onclick="showPage('profilePage')">⚙️</div>
+    </nav>
+
+    <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
+    <script>
+        let db = JSON.parse(localStorage.getItem('AS_MASTER_DB')) || [];
+        let cart = [], cur = null, curS = null, imgD = "", swp, curCat = "All", currentSort = "new";
+
+        // DROPDOWN LOGIC
+        function toggleSort() { document.getElementById('sortMenu').classList.toggle('show'); }
+        function setSort(val, label) {
+            currentSort = val;
+            document.getElementById('sortLabel').innerHTML = `<span>${label}</span> ▾`;
+            document.getElementById('sortMenu').classList.remove('show');
+            filterProducts();
+        }
+        function closeAllDropdowns(e) { if(!e.target.closest('.dropdown-container')) { document.getElementById('sortMenu').classList.remove('show'); } }
+
+        function openPopup(sub) {
+            document.getElementById('popupSub').innerText = sub;
+            document.getElementById('customPopup').classList.add('show');
+        }
+        function closePopup() { document.getElementById('customPopup').classList.remove('show'); }
+
+        function showPage(id) {
+            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+            document.getElementById(id).classList.add('active');
+            if(id === 'cartPage') renderBag();
+        }
+
+        function prepImg(e) {
+            const reader = new FileReader(); reader.readAsDataURL(e.target.files[0]);
+            reader.onload = (ev) => {
+                const img = new Image(); img.src = ev.target.result;
+                img.onload = () => {
+                    const canvas = document.createElement('canvas'); const ctx = canvas.getContext('2d');
+                    canvas.width = 500; canvas.height = (img.height * 500) / img.width;
+                    ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+                    imgD = canvas.toDataURL('image/jpeg', 0.6);
+                };
+            };
+        }
+
+        function save() {
+            const n = document.getElementById('in').value, p = document.getElementById('ip').value, c = document.getElementById('ic').value;
+            const s = Array.from(document.querySelectorAll('.isz:checked')).map(x => x.value);
+            if(n && p && imgD) {
+                db.push({ id: Date.now(), name: n, price: parseInt(p), cat: c, sizes: s, img: imgD });
+                localStorage.setItem('AS_MASTER_DB', JSON.stringify(db));
+                imgD = ""; document.getElementById('in').value = ""; renderHome();
+            }
+        }
+
+        function filterProducts() {
+            const q = document.getElementById('searchInput').value.toLowerCase();
+            let filtered = db.filter(x => (curCat === 'All' || x.cat === curCat) && x.name.toLowerCase().includes(q));
+            
+            if(currentSort === 'low') filtered.sort((a,b) => a.price - b.price);
+            else if(currentSort === 'high') filtered.sort((a,b) => b.price - a.price);
+            else filtered.sort((a,b) => b.id - a.id);
+
+            document.getElementById('sGrid').innerHTML = filtered.map(x => `
+                <div class="glass overflow-hidden" onclick="viewP(${x.id})">
+                    <img src="${x.img}" class="w-full aspect-[4/5] object-cover">
+                    <div class="p-4 text-center"><p class="text-[9px] font-bold opacity-50 uppercase truncate">${x.name}</p><p class="text-yellow-500 font-black">₹${x.price}</p></div>
+                </div>`).join('');
+        }
+
+        function setCat(c, el) {
+            curCat = c; document.querySelectorAll('.filter-chip').forEach(x => x.classList.remove('active'));
+            el.classList.add('active'); filterProducts();
+        }
+
+        function renderHome() {
+            filterProducts();
+            const b = db.slice(-5);
+            document.getElementById('bList').innerHTML = b.map(x => `<div class="swiper-slide"><img src="${x.img}"></div>`).join('');
+            if(swp) swp.destroy(); swp = new Swiper(".mainSwiper", { loop: true, autoplay: { delay: 3000 } });
+
+            document.getElementById('iList').innerHTML = db.map(x => `
+                <div class="flex items-center justify-between glass p-2">
+                    <img src="${x.img}" class="w-10 h-10 rounded-lg object-cover">
+                    <div class="flex-1 px-3 text-[9px] font-bold truncate uppercase">${x.name}</div>
+                    <button onclick="del(${x.id})" class="text-red-500 px-3 text-[9px] font-black">DEL</button>
+                </div>`).join('');
+        }
+
+        function viewP(id) {
+            cur = db.find(x => x.id === id); curS = null;
+            document.getElementById('vi').innerHTML = `<img src="${cur.img}" class="w-full h-full object-cover">`;
+            document.getElementById('vt').innerText = cur.name;
+            document.getElementById('vp').innerText = "₹" + cur.price;
+            document.getElementById('vs').innerHTML = cur.sizes.map(s => `<div class="size-box" onclick="selSize('${s}', this)">${s}</div>`).join('');
+            document.getElementById('pDet').classList.remove('hidden');
+        }
+
+        function selSize(s, el) {
+            curS = s; document.querySelectorAll('.size-box').forEach(x => x.classList.remove('selected'));
+            el.classList.add('selected');
+        }
+
+        function addToBag() {
+            if(!curS && cur.sizes.length > 0) { openPopup("Please Select Size First"); return; }
+            cart.push({...cur, selSize: curS});
+            document.getElementById('pDet').classList.add('hidden');
+        }
+
+        function renderBag() {
+            const list = document.getElementById('bItems'), sum = document.getElementById('bSummary'), emp = document.getElementById('bEmpty');
+            if(cart.length === 0) { list.innerHTML = ""; emp.classList.remove('hidden'); sum.classList.add('hidden'); }
+            else {
+                emp.classList.add('hidden'); sum.classList.remove('hidden');
+                let total = 0;
+                list.innerHTML = cart.map((x, i) => { total += x.price; return `
+                    <div class="glass p-4 flex items-center shadow-lg">
+                        <img src="${x.img}" class="w-16 h-16 rounded-2xl object-cover mr-4">
+                        <div class="flex-1"><p class="text-[12px] font-bold uppercase">${x.name}</p><p class="text-yellow-500 text-[10px]">₹${x.price} | Size: ${x.selSize || 'N/A'}</p></div>
+                        <button onclick="cart.splice(${i},1);renderBag()" class="text-red-500 px-2 font-black">✕</button>
+                    </div>`}).join('');
+                document.getElementById('totalPrice').innerText = "₹" + total;
+            }
+        }
+
+        function order() {
+            const n = document.getElementById('cn').value, a = document.getElementById('ca').value; if(!n || !a) return;
+            let total = cart.reduce((s, i) => s + i.price, 0);
+            let m = `*AS ENTERPRISES ORDER*%0A*Name:* ${n}%0A*Address:* ${a}%0A*Items:*%0A${cart.map(i => `• ${i.name} (${i.selSize})`).join('%0A')}%0A*Total:* ₹${total}`;
+            window.open(`https://wa.me/919211698297?text=${m}`, '_blank');
+        }
+
+        function auth() { if(document.getElementById('pin').value === "9211") { document.getElementById('aLogin').classList.add('hidden'); document.getElementById('aPanel').classList.remove('hidden'); renderHome(); } }
+        function del(id) { db = db.filter(x => x.id !== id); localStorage.setItem('AS_MASTER_DB', JSON.stringify(db)); renderHome(); }
+        window.onload = renderHome;
+    </script>
+</body>
+</html>
